@@ -1,37 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class EnemyNav : MonoBehaviour
 {
-    public List<Vector2> wayPoints = new List<Vector2>();
-    Rigidbody2D rb;
-    float speed = 2f;
+    private List<Vector2> wayPoints = new List<Vector2>();
+    private Rigidbody2D rb;
+    public float speed = 2f;
     private int curIndex = 0;
-    Vector2 target;
-    // Start is called before the first frame update
+    private Vector2 FirstDirection;
+
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.velocity = (wayPoints[curIndex] - (Vector2)transform.position).normalized * speed;
+        for (int i = 0; i < GameManager.Instance.WayPoints.Count; i++)
+            wayPoints.Add(GameManager.Instance.WayPoints[i].position);
 
-        target = wayPoints[curIndex];
+        rb = GetComponent<Rigidbody2D>();
+        if (wayPoints[0].y < transform.position.y)
+            FirstDirection = Vector2.down;
+        else
+            FirstDirection = Vector2.up;
+        rb.velocity = FirstDirection * speed;
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (curIndex >= wayPoints.Count) return;
-
-        if (Vector2.Distance(transform.position, target) < 0.05f)
+        if (curIndex < 2 && Vector2.Distance(rb.position, wayPoints[curIndex]) < 0.2f)
         {
+            rb.velocity = curIndex == 0 ? Vector2.right * speed : FirstDirection * -speed;
             curIndex++;
-            if (curIndex < wayPoints.Count){
-                target = wayPoints[curIndex];
-                rb.velocity = (target - (Vector2)transform.position).normalized * speed;
-            }
-            else
-                Destroy(gameObject);
+        }
+    }
+    
+    private void OnTriggerEnter2D(Collider2D other) {
+        if (other.gameObject.layer == LayerMask.NameToLayer("Goal") && curIndex == 2)
+        {
+            Debug.Log("도착");
+            Destroy(gameObject, 0.2f);
         }
     }
 }
