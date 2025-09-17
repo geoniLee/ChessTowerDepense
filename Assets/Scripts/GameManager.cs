@@ -27,4 +27,9 @@ public class GameManager : MonoBehaviour
             Destroy(enemy.gameObject);
         }
     }
+
+    public void ExitApplication()
+    {
+        Application.Quit();
+    }
 }
