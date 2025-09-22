@@ -5,12 +5,17 @@ using UnityEngine;
 
 public class EnemyNav : MonoBehaviour
 {
+    public EnemyState enemyState;
     private List<Vector2> wayPoints = new List<Vector2>();
     private Rigidbody2D rb;
-    public float speed = 2f;
     private int curIndex = 0;
     private Vector2 FirstDirection;
+    private float speed => enemyState.Speed;
 
+    void Awake()
+    {
+        enemyState = Resources.Load<EnemyState>("State/" + gameObject.name.Replace("(Clone)", ""));
+    }
     void Start()
     {
         for (int i = 0; i < GameManager.Instance.WayPoints.Count; i++)
