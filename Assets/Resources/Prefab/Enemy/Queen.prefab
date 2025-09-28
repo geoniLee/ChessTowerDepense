@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8041242032931585296}
   - component: {fileID: 5242136693052527662}
   - component: {fileID: 8287068129694751939}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Queen
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dc786b1d661fb24ea65e3f9bbdc62b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  enemyState: {fileID: 0}
 --- !u!50 &5242136693052527662
 Rigidbody2D:
   serializedVersion: 4

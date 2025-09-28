@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8849597998424770787}
   - component: {fileID: 1809265010948378483}
   - component: {fileID: 8108321733120827275}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Rook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dc786b1d661fb24ea65e3f9bbdc62b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 2
+  enemyState: {fileID: 0}
 --- !u!50 &1809265010948378483
 Rigidbody2D:
   serializedVersion: 4

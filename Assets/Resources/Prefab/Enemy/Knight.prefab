@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 2196719898185071398}
   - component: {fileID: 7520239863343393066}
   - component: {fileID: 3231559999446192964}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Knight
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dc786b1d661fb24ea65e3f9bbdc62b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 3
+  enemyState: {fileID: 0}
 --- !u!50 &7520239863343393066
 Rigidbody2D:
   serializedVersion: 4

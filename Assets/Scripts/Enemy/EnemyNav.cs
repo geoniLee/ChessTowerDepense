@@ -14,7 +14,7 @@ public class EnemyNav : MonoBehaviour
 
     void Awake()
     {
-        enemyState = Resources.Load<EnemyState>("State/" + gameObject.name.Replace("(Clone)", ""));
+        enemyState = Resources.Load<EnemyState>("State/Enemy/" + gameObject.name.Replace("(Clone)", ""));
     }
     void Start()
     {

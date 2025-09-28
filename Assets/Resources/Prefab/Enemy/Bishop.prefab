@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3356773514293869894}
   - component: {fileID: 7079910058938062662}
   - component: {fileID: 836562898042211198}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Bishop
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2dc786b1d661fb24ea65e3f9bbdc62b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 1
+  enemyState: {fileID: 0}
 --- !u!50 &7079910058938062662
 Rigidbody2D:
   serializedVersion: 4
