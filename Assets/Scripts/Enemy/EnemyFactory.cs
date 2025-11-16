@@ -19,7 +19,7 @@ public class EnemyFactory : MonoBehaviour
         {
             int spawnIndex = Random.Range(0, spawnPoints.Count);
             var enemy = Instantiate(enemyPrefabs[EnemyIndex], spawnPoints[spawnIndex].position, Quaternion.identity);
-            enemy.transform.SetParent(GameManager.Instance.AllEnemy.transform);
+            enemy.transform.SetParent(GameManager.Instance.allEnemy.transform);
             EnemyIndex = (EnemyIndex + 1) % enemyPrefabs.Count;
             yield return new WaitForSeconds(1f);
         }

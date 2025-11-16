@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f65de30df7a3bf479e37c6a37fb5a8d, type: 3}
   m_Name: Rook
   m_EditorClassIdentifier: 
-  Health: 10
-  Speed: 1
+  Health: 210
+  Speed: 2
   Damage: 1
   StunTime: 0

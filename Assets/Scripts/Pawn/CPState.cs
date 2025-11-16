@@ -2,8 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Pawn", menuName = "Scriptable/Pawn", order = int.MaxValue)]
-public class PawnState : ScriptableObject
+[CreateAssetMenu(fileName = "CPState", menuName = "Scriptable/ChessPiece/CPState", order = int.MaxValue)]
+public class CPState : ScriptableObject
 {
     public int Damage;
     public float AttackRange;

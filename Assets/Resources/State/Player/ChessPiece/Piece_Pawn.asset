@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93f71b4ba8ed3724fbb2d1bdd37da815, type: 3}
   m_Name: Piece_Pawn
   m_EditorClassIdentifier: 
-  Damage: 5
-  AttackRange: 3
-  AttackDelay: 2
+  Damage: 8
+  AttackRange: 11
+  AttackDelay: 0.5
   AttackPrefab: {fileID: 0}
   IsTargetAttack: 0

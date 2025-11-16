@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Piece_Queen
   m_EditorClassIdentifier: 
   Damage: 0
-  AttackRange: 0
+  AttackRange: 22
   AttackDelay: 0
   AttackPrefab: {fileID: 0}
   IsTargetAttack: 0
