@@ -13,6 +13,9 @@ public class ChessPieces : MonoBehaviour
     private EnemyNav target;
     Collider2D enemy = null;
 
+    // 합성용 등급 (0: 기본, 1: 1단계, 2: 2단계, ...)
+    public int grade = 0;
+
     // 타입별 이펙트용 필드
     public GameObject explosionPrefab; // 타입2: 폭발 프리팹 (Inspector에 할당)
     private Coroutine windCoroutine;

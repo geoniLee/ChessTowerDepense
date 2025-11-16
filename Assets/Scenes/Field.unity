@@ -6587,6 +6587,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilemap: {fileID: 1669245843}
   prefab: {fileID: 7483139161596776823, guid: 79a4775de01bad545aa2c98b05f5c1f9, type: 3}
+  gradePrefabs:
+  - {fileID: 7483139161596776823, guid: 79a4775de01bad545aa2c98b05f5c1f9, type: 3}
+  - {fileID: 7483139161596776823, guid: ffb25c8a58856c445931d660be3a78da, type: 3}
   leftEx: 1
   rightEx: 1
   topEx: 5
