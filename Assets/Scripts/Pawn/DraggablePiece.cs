@@ -122,8 +122,9 @@ public class DraggablePiece : MonoBehaviour
         }
         else
         {
-            // 빈 셀이면 이동
-            spawner.MovePiece(gameObject, originalCell, dropCell);
+            // 빈 셀이면 원위치로 복귀
+            Debug.Log("[DraggablePiece] 빈 셀로 드롭. 원위치 복귀.");
+            transform.position = originalPosition;
         }
     }
 }

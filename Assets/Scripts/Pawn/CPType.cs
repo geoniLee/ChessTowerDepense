@@ -5,7 +5,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "CPType", menuName = "Scriptable/ChessPiece/Type", order = int.MaxValue)]
 public class CPType : ScriptableObject
 {
-    public float[] damageRatio = new float[6]; // 데미지 배율
+    [Header("데미지 배율 (레벨당 0.1씩 증가)")]
+    public float[] damageRatio = new float[6]; // 각 타입별 기본 배율 (1.0부터 시작 권장)
+    
     [Header("전기")]
     public int eletricTargetCount; // 번개 타겟 수
     [Header("독")]

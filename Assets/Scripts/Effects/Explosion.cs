@@ -12,7 +12,6 @@ public class Explosion : MonoBehaviour
 {
     private float damage = 1f;
     private float range = 1f;
-    private float lifetime = 0.3f;
     private CircleCollider2D cc;
 
     private void Awake()
@@ -32,21 +31,12 @@ public class Explosion : MonoBehaviour
         {
             cc.radius = Mathf.Max(0.01f, range);
         }
-
-        // 자동 제거
-        StartCoroutine(LifeCoroutine());
     }
 
     // SendMessage entrypoint used by Spawn code
     private void InitExplosion(Vector2 args)
     {
         Init(args);
-    }
-
-    private IEnumerator LifeCoroutine()
-    {
-        yield return new WaitForSeconds(lifetime);
-        Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other)

@@ -16,8 +16,6 @@ public class ChessPieces : MonoBehaviour
     // 합성용 등급 (0: 기본, 1: 1단계, 2: 2단계, ...)
     public int grade = 0;
 
-    // 타입별 이펙트용 필드
-    public GameObject explosionPrefab; // 타입2: 폭발 프리팹 (Inspector에 할당)
     private Coroutine windCoroutine;
 
     void Awake()
@@ -63,12 +61,12 @@ public class ChessPieces : MonoBehaviour
         Color col = Color.white;
         switch (type)
         {
-            case 0: col = Color.yellow; break; // 노랑
-            case 1: col = new Color(0.6f, 0f, 0.6f); break; // 보라(마젠타 계열)
-            case 2: col = Color.red; break; // 빨강
-            case 3: col = new Color(0.78f, 0.95f, 0.66f); break; // 초록
-            case 4: col = Color.gray; break; // 회색
-            case 5: col = Color.blue; break; // 파랑
+            case 0: col = new Color(1, 1, 179f/255f); break; // 전기 - 노랑
+            case 1: col = new Color(179f/255f, 1, 179f/255f); break; // 독 - 연두
+            case 2: col = new Color(1, 179f/255f, 179f/255f); break; // 불 - 빨강
+            case 3: col = new Color(179f/255f, 1, 1); break; // 바람 - 하늘색
+            case 4: col = new Color(198f/255f, 179f/255f, 1); break; // 암흑 - 보라
+            case 5: col = new Color(179f/255f, 198f/255f, 1); break; // 얼음 - 파랑
             default: col = Color.white; break;
         }
 
@@ -124,10 +122,20 @@ public class ChessPieces : MonoBehaviour
         if (enemyNav == null) return;
 
         CPType cp = GameManager.Instance != null ? GameManager.Instance._CPType : null;
-    float baseDamage = pawnState != null ? pawnState.Damage : 1f;
-    // 타입 레벨에 따라 추가 데미지 적용 (요청: damage += (level - 1))
-    int extra = Mathf.Max(0, typeLevel - 1);
-    float damageWithLevel = baseDamage + extra;
+        int baseDamage = pawnState != null ? pawnState.Damage : 1;
+        
+        // CPType의 damageRatio 배율 적용 (레벨당 +0.1)
+        float ratio = 1.0f; // 기본 배율
+        if (cp != null && cp.damageRatio != null && type >= 0 && type < cp.damageRatio.Length)
+        {
+            // 기본 배율 + (레벨 - 1) * 0.1
+            ratio = cp.damageRatio[type] + (typeLevel - 1) * 0.1f;
+        }
+        
+        float damageWithLevel = baseDamage * ratio;
+        
+        // 5레벨당 특성 강화 계산
+        int levelBonus = (typeLevel - 1) / 5; // 1~4렉: 0, 5~9렉: 1, 10~14렉: 2...
 
         // 공격 타입 로그 출력
         string[] typeNames = new string[] { "Electric", "Poison", "Explosion", "Wind", "Death", "Ice" };
@@ -135,28 +143,50 @@ public class ChessPieces : MonoBehaviour
         
         switch (type)
         {
-            case 0: // 전기: 체인 전이
-                StartCoroutine(ElectricChain(enemyNav, cp.eletricTargetCount, damageWithLevel));
+            case 0: // 전기: 체인 전이 (5렉당 타겟 +1)
+                int electricTargets = cp.eletricTargetCount + levelBonus;
+                StartCoroutine(ElectricChain(enemyNav, electricTargets, damageWithLevel));
                 break;
-            case 1: // 독: 주기적 데미지
-                StartCoroutine(DoPoison(enemyNav, cp.poisonDamageRatio, cp.poisonDamageSpeed, damageWithLevel));
+            case 1: // 독: 주기적 데미지 (5렉당 틱 +1)
+                StartCoroutine(DoPoison(enemyNav, cp.poisonDamageRatio, cp.poisonDamageSpeed, damageWithLevel, 5 + levelBonus));
                 break;
-            case 2: // 폭발: 프리팹 생성(Trigger 내부에서 처리)
-                DoExplosionPrefab(enemyNav, cp.explosionRange, cp.explosionDamageRatio, damageWithLevel);
+            case 2: // 폭발: 프리팹 생성 (5렉당 범위 +0.5, 배율 +0.05)
+                float explosionRange = cp.explosionRange + (levelBonus * 0.5f);
+                float explosionRatio = cp.explosionDamageRatio + (levelBonus * 0.05f);
+                DoExplosionPrefab(enemyNav, explosionRange, explosionRatio, damageWithLevel);
                 break;
-            case 3: // 바람: 공격 속도(attackDelay) 적용
-                ApplyWind(cp.windAttackSpeed);
+            case 3: // 바람: 공격 속도 (5렉당 +0.2)
+                float windSpeed = cp.windAttackSpeed + (levelBonus * 0.2f);
+                ApplyWind(windSpeed, enemyNav);
                 enemyNav.Damaged(Mathf.RoundToInt(damageWithLevel));
                 break;
-            case 4: // 즉사 확률
-                TryInstantKill(enemyNav, cp.deathProbability, damageWithLevel);
+            case 4: // 즉사 확률 (5렉당 +0.005)
+                float deathProb = cp.deathProbability + (levelBonus * 0.005f);
+                TryInstantKill(enemyNav, deathProb, damageWithLevel);
                 break;
-            case 5: // 얼음: 슬로우 및 멈춤 확률
-                ApplyIceEffect(enemyNav, cp.iceSlowRate, cp.iceSlowTime, cp.iceStopProbability, damageWithLevel);
+            case 5: // 얼음: 슬로우 및 멈춤 확률 (5렉당 정지확률 +0.01)
+                float iceStopProb = cp.iceStopProbability + (levelBonus * 0.01f);
+                ApplyIceEffect(enemyNav, cp.iceSlowRate, cp.iceSlowTime, iceStopProb, damageWithLevel);
                 break;
             default:
                 enemyNav.Damaged(Mathf.RoundToInt(damageWithLevel));
                 break;
+        }
+    }
+
+    // 이펙트 생성 헬퍼 메서드
+    private void SpawnEffect(int typeIndex, Vector3 position)
+    {
+        if (GameManager.Instance == null || GameManager.Instance.typeEffectPrefabs == null)
+            return;
+            
+        if (typeIndex < 0 || typeIndex >= GameManager.Instance.typeEffectPrefabs.Length)
+            return;
+            
+        GameObject effectPrefab = GameManager.Instance.typeEffectPrefabs[typeIndex];
+        if (effectPrefab != null)
+        {
+            Instantiate(effectPrefab, position, Quaternion.identity);
         }
     }
 
@@ -176,9 +206,14 @@ public class ChessPieces : MonoBehaviour
             if (cur == null) continue;
             var go = cur.gameObject;
             if (hit.Contains(go)) continue;
+            
+            // 데미지 적용
             cur.Damaged(Mathf.RoundToInt(damage));
             hit.Add(go);
             count++;
+
+            // 이펙트 생성 (타입 0: Electric)
+            SpawnEffect(0, go.transform.position);
 
             // 주변 적 추가
             var cols = Physics2D.OverlapCircleAll(go.transform.position, attackRange, 1 << enemyLayer);
@@ -192,58 +227,80 @@ public class ChessPieces : MonoBehaviour
         }
     }
 
-    // 1: 독 데미지 — 즉시 데미지 후 주기적 독 데미지 (로그 추가)
-    private IEnumerator DoPoison(EnemyNav enemyNav, float ratio, float period, float baseDamage)
+    // 1: 독 데미지 — 즉시 데미지 후 주기적 독 데미지 (틱마다 이펙트 생성)
+    private IEnumerator DoPoison(EnemyNav enemyNav, float ratio, float period, float baseDamage, int ticks = 5)
     {
         if (enemyNav == null) yield break;
 
-        // 즉시 기본 데미지 적용
+        // 즉시 기본 데미지 적용 + 이펙트
+        SpawnEffect(1, enemyNav.transform.position);
         int immediateDmg = Mathf.RoundToInt(baseDamage);
         enemyNav.Damaged(immediateDmg);
 
         // 짧은 지연 후 독(주기) 데미지 적용
         yield return new WaitForSeconds(0.05f);
 
-        int ticks = 5; // 임의 설정: 필요하면 CP 설정으로 노출 가능
         for (int i = 0; i < ticks; i++)
         {
             Debug.Log($"[Poison] Tick {i + 1}/{ticks} 적용: {Mathf.Max(1, Mathf.RoundToInt(baseDamage * ratio))} 데미지");
             if (enemyNav == null) yield break; // 적이 사망했으면 중단
+            
+            // 틱마다 독 이펙트 생성
+            SpawnEffect(1, enemyNav.transform.position);
+            
             int tickDmg = Mathf.Max(1, Mathf.RoundToInt(baseDamage * ratio));
             enemyNav.Damaged(tickDmg);
             yield return new WaitForSeconds(Mathf.Max(0.01f, period));
         }
     }
 
-    // 2: 폭발 프리팹 생성
+    // 2: 폭발 이펙트 생성 (이펙트 프리팹이 Explosion 컴포넌트로 공격 처리)
     private void DoExplosionPrefab(EnemyNav enemyNav, float range, float damageRatio, float baseDamage)
     {
         if (enemyNav == null) return;
-        if (explosionPrefab == null)
+        
+        // GameManager에서 폭발 이펙트 프리팹 가져오기
+        if (GameManager.Instance == null || GameManager.Instance.typeEffectPrefabs == null)
         {
-            // 프리팹 없으면 직접 데미지
-            enemyNav.Damaged(Mathf.RoundToInt(baseDamage * damageRatio));
+            Debug.LogWarning("[ChessPieces] GameManager 또는 typeEffectPrefabs가 없습니다.");
             return;
         }
+        
+        GameObject explosionEffect = GameManager.Instance.typeEffectPrefabs[2];
+        if (explosionEffect == null)
+        {
+            Debug.LogWarning("[ChessPieces] 폭발 이펙트 프리팹(typeEffectPrefabs[2])이 할당되지 않았습니다.");
+            return;
+        }
+        
         var pos = enemyNav.transform.position;
-        var inst = Instantiate(explosionPrefab, pos, Quaternion.identity);
+        var inst = Instantiate(explosionEffect, pos, Quaternion.identity);
+        
+        // Explosion 컴포넌트에 범위와 데미지 전달
         inst.SendMessage("InitExplosion", new Vector2(range, baseDamage * damageRatio), SendMessageOptions.DontRequireReceiver);
     }
 
     // 3: 바람(공격 속도 적용)
-    private void ApplyWind(float multiplier)
+    private void ApplyWind(float multiplier, EnemyNav enemyNav)
     {
         if (multiplier <= 0) return;
         // 공격 딜레이를 감소시켜 빠르게 만듦
         attackDelay = Mathf.Max(0.01f, pawnState != null ? pawnState.AttackDelay / multiplier : 0.1f);
+        
+        // 바람 이펙트 생성 (타입 3: Wind)
+        if (enemyNav != null)
+            SpawnEffect(3, enemyNav.transform.position);
     }
 
     // 4: 즉사 확률
     private void TryInstantKill(EnemyNav enemyNav, float prob, float baseDamage)
     {
         if (enemyNav == null) return;
+        
         if (Random.value < prob)
         {
+            // 즉사 성공 시에만 이펙트 생성 (타입 4: Death)
+            SpawnEffect(4, enemyNav.transform.position);
             Destroy(enemyNav.gameObject);
         }
         else
@@ -256,6 +313,10 @@ public class ChessPieces : MonoBehaviour
     private void ApplyIceEffect(EnemyNav enemyNav, float slowRate, float slowTime, float stopProb, float baseDamage)
     {
         if (enemyNav == null) return;
+        
+        // 얼음 이펙트 생성 (타입 5: Ice)
+        SpawnEffect(5, enemyNav.transform.position);
+        
         // EnemyNav 내부에서 슬로우/정지 처리를 하도록 요청
         enemyNav.ApplySlow(new Vector2(slowRate, slowTime));
 

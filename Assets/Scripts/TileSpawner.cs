@@ -42,6 +42,13 @@ public class TileSpawner : MonoBehaviour
     /// 버튼 클릭 시: 8×4 영역 내에서 '아직 점유되지 않은' 랜덤 셀 1곳에 프리팹 생성
     public void SpawnRandom()
     {
+        // 골드 확인 및 소비
+        if (GameManager.Instance == null || !GameManager.Instance.TrySpendGoldForSpawn())
+        {
+            Debug.LogWarning("[TileSpawner] 골드가 부족하여 소환할 수 없습니다.");
+            return;
+        }
+
         var candidates = new List<Vector3Int>();
 
         for (int y = yMin; y < yMax; y++)
@@ -104,6 +111,18 @@ public class TileSpawner : MonoBehaviour
     public bool IsOccupied(Vector3Int cell)
     {
         return occupied.Contains(cell);
+    }
+
+    /// 생성된 모든 기물 오브젝트 가져오기
+    public List<GameObject> GetAllSpawnedPieces()
+    {
+        List<GameObject> pieces = new List<GameObject>();
+        foreach (var kvp in cellToObject)
+        {
+            if (kvp.Value != null)
+                pieces.Add(kvp.Value);
+        }
+        return pieces;
     }
 
     /// 기물 이동 처리 (단순 이동)
@@ -210,3 +229,5 @@ public class TileSpawner : MonoBehaviour
     }
     #endregion
 }
+
+

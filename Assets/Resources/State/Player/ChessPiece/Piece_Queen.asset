@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 93f71b4ba8ed3724fbb2d1bdd37da815, type: 3}
   m_Name: Piece_Queen
   m_EditorClassIdentifier: 
-  Damage: 0
+  Damage: 12
   AttackRange: 22
-  AttackDelay: 0
+  AttackDelay: 1
   AttackPrefab: {fileID: 0}
   IsTargetAttack: 0

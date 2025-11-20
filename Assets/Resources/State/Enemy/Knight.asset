@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1f65de30df7a3bf479e37c6a37fb5a8d, type: 3}
   m_Name: Knight
   m_EditorClassIdentifier: 
-  Health: 180
+  enemyGrade: 1
+  Health: 60
   Speed: 3
   Damage: 1
   StunTime: 0
