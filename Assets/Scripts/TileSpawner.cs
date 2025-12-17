@@ -155,7 +155,7 @@ public class TileSpawner : MonoBehaviour
         Debug.Log($"[TileSpawner] 기물 이동: {fromCell} → {toCell}");
     }
 
-    /// 기물 합성 처리 (같은 등급이면 상위 프리팹으로 업그레이드)
+    // 기물 합성 처리 (같은 등급이면 상위 프리팹으로 업그레이드)
     public bool TryMergePieces(GameObject draggedPiece, Vector3Int fromCell, Vector3Int toCell)
     {
         var targetPiece = GetPieceAt(toCell);

@@ -37,10 +37,30 @@ public class EnemyNav : MonoBehaviour
             currentHealth = maxHealth;
         }
     }
+
+    // 골까지 남은 경로 거리 계산 (현재 위치 → 다음 웨이포인트들 → 골)
+    public float GetRemainingPathDistance()
+    {
+        if (wayPoints == null || wayPoints.Count == 0) return float.MaxValue;
+        
+        float distance = 0f;
+        
+        // 현재 위치에서 다음 웨이포인트까지 거리
+        if (curIndex < wayPoints.Count)
+        {
+            distance += Vector2.Distance(transform.position, wayPoints[curIndex]);
+            
+            // 남은 웨이포인트들 사이 거리
+            for (int i = curIndex; i < wayPoints.Count - 1; i++)
+            {
+                distance += Vector2.Distance(wayPoints[i], wayPoints[i + 1]);
+            }
+        }
+        
+        return distance;
+    }
     
-    /// <summary>
-    /// 웨이브 배율 적용 (EnemyState.Health × 웨이브)
-    /// </summary>
+    // 웨이브 배율 적용 (EnemyState.Health × 웨이브)
     public void SetWaveMultiplier(int wave)
     {
         if (enemyState != null)

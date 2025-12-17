@@ -51,9 +51,7 @@ public class WaveManager : MonoBehaviour
         StartCoroutine(WaveRoutine());
     }
 
-    /// <summary>
-    /// 웨이브 루틴 - 웨이브 시작 → 스폰 → 모든 적 처치 또는 대기 시간 경과 → 다음 웨이브
-    /// </summary>
+    // 웨이브 루틴 - 웨이브 시작 → 스폰 → 모든 적 처치 또는 대기 시간 경과 → 다음 웨이브
     private IEnumerator WaveRoutine()
     {
         while (true)
@@ -81,9 +79,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 현재 웨이브의 몬스터를 스폰
-    /// </summary>
+    // 현재 웨이브의 몬스터를 스폰
     private IEnumerator SpawnWave()
     {
         isWaveActive = true;
@@ -130,9 +126,7 @@ public class WaveManager : MonoBehaviour
         isWaveActive = false;
     }
 
-    /// <summary>
-    /// 웨이브 종료 조건 대기: 모든 적 처치 또는 대기 시간 경과 중 먼저 만족되는 조건
-    /// </summary>
+    // 웨이브 종료 조건 대기: 모든 적 처치 또는 대기 시간 경과 중 먼저 만족되는 조건
     private IEnumerator WaitForWaveEndCondition(bool isBossWave)
     {
         float maxDelay = isBossWave ? bossWaveDelay : waveDelay;
@@ -198,9 +192,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 모든 적이 처치될 때까지 대기
-    /// </summary>
+    // 모든 적이 처치될 때까지 대기
     private IEnumerator WaitForAllEnemiesDefeated()
     {
         Debug.Log("[WaveManager] 모든 적 처치 대기 중...");
@@ -229,9 +221,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 웨이브에 따른 몬스터 구성 계산
-    /// </summary>
+    // 웨이브에 따른 몬스터 구성 계산
     private Dictionary<int, int> CalculateEnemyComposition(int wave, float waveCost)
     {
         Dictionary<int, int> composition = new Dictionary<int, int>();
@@ -280,9 +270,7 @@ public class WaveManager : MonoBehaviour
         return composition;
     }
 
-    /// <summary>
-    /// 웨이브에 따른 몬스터 등급 비율 반환
-    /// </summary>
+    // 웨이브에 따른 몬스터 등급 비율 반환
     private Dictionary<int, float> GetWaveRatios(int wave)
     {
         Dictionary<int, float> ratios = new Dictionary<int, float>();
@@ -321,9 +309,7 @@ public class WaveManager : MonoBehaviour
         return ratios;
     }
 
-    /// <summary>
-    /// 특정 등급의 몬스터 스폰
-    /// </summary>
+    // 특정 등급의 몬스터 스폰
     private void SpawnEnemy(int grade)
     {
         if (grade < 0 || grade >= enemyPrefabs.Length || enemyPrefabs[grade] == null)
@@ -360,9 +346,7 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 리스트 섞기 (Fisher-Yates 알고리즘)
-    /// </summary>
+    // 리스트 섞기 (Fisher-Yates 알고리즘)
     private void ShuffleList(List<int> list)
     {
         for (int i = list.Count - 1; i > 0; i--)
@@ -374,13 +358,9 @@ public class WaveManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 현재 웨이브 정보 반환
-    /// </summary>
+    // 현재 웨이브 정보 반환
     public int GetCurrentWave() => currentWave;
 
-    /// <summary>
-    /// 웨이브 활성 상태 반환
-    /// </summary>
+    // 웨이브 활성 상태 반환
     public bool IsWaveActive() => isWaveActive;
 }

@@ -100,36 +100,60 @@ public class ChessPieces : MonoBehaviour
     void Update()
     {
         // 적에게 공격당한 후 공격 불가 시간이면 공격하지 않음
-        if (!CanAttack())
-        {
-            return;
-        }
+        if (!CanAttack()) return;
 
-        if (enemy == null)
+        // 공격 딜레이 감소
+        attackDelay -= Time.deltaTime;
+        if (attackDelay <= 0)
         {
-            enemy = Physics2D.OverlapCircle(transform.position, attackRange, enemyLayerMask);
-            target = enemy?.GetComponent<EnemyNav>();
-        }
-        else if (enemy != null && target != null)
-        {
-            attackDelay -= Time.deltaTime;
-            if (attackDelay <= 0)
+            // 공격 시점에 골 지점에 가장 가까운 타겟 탐색
+            target = FindClosestEnemyToGoal();
+            if (target == null)
             {
-                // 타입별 공격 효과 적용
-                ApplyAttackEffect(target);
+                attackDelay = 0.1f; // 타겟 없으면 짧은 딜레이 후 재탐색
+                return;
+            }
 
-                // 타격 후 초기화
-                enemy = null;
-                target = null;
+            // 타입별 공격 효과 적용
+            ApplyAttackEffect(target);
 
-                // 킹 버프 적용: 아군 킹 개수에 따라 공격속도 배율
-                int kingCount = GameManager.Instance != null ? GameManager.Instance.GetAllyKingCount() : 0;
-                float attackSpeedMultiplier = 1.0f + Mathf.Min(kingCount, 3) * 1.0f;
-                
-                // 기본 공격 지연 초기화 (바람 타입 등은 내부에서 조정 가능)
-                attackDelay = pawnState.AttackDelay / attackSpeedMultiplier;
+            // 킹 버프 적용: 아군 킹 개수에 따라 공격속도 배율
+            int kingCount = GameManager.Instance != null ? GameManager.Instance.GetAllyKingCount() : 0;
+            float attackSpeedMultiplier = 1.0f + Mathf.Min(kingCount, 3) * 1.0f;
+            
+            // 기본 공격 지연 초기화 (바람 타입 등은 내부에서 조정 가능)
+            attackDelay = pawnState.AttackDelay / attackSpeedMultiplier;
+
+            // 타격 후 초기화 (다음 공격 시 새 타겟 탐색)
+            enemy = null;
+            target = null;
+        }
+    }
+
+    // 골까지 경로상 가장 가까운 적 탐색 (진행도 기준)
+    private EnemyNav FindClosestEnemyToGoal()
+    {
+        Collider2D[] enemies = Physics2D.OverlapCircleAll(transform.position, attackRange, enemyLayerMask);
+        if (enemies.Length == 0) return null;
+
+        EnemyNav closestEnemy = null;
+        float shortestRemainingPath = float.MaxValue;
+
+        foreach (Collider2D enemyCollider in enemies)
+        {
+            EnemyNav enemyNav = enemyCollider.GetComponent<EnemyNav>();
+            if (enemyNav == null) continue;
+
+            float remainingPath = enemyNav.GetRemainingPathDistance();
+            if (remainingPath < shortestRemainingPath)
+            {
+                shortestRemainingPath = remainingPath;
+                closestEnemy = enemyNav;
+                enemy = enemyCollider;
             }
         }
+
+        return closestEnemy;
     }
 
     // 타입별 공격 효과 진입점
@@ -194,9 +218,10 @@ public class ChessPieces : MonoBehaviour
         }
     }
 
-    // 이펙트 생성 헬퍼 메서드
-    private void SpawnEffect(int typeIndex, Vector3 position)
+    // 이펙트 생성 헬퍼 메서드 (allEffects 하위에 생성)
+    private void SpawnEffect(int typeIndex, Transform target)
     {
+        if (target == null) return;
         if (GameManager.Instance == null || GameManager.Instance.typeEffectPrefabs == null)
             return;
             
@@ -206,7 +231,9 @@ public class ChessPieces : MonoBehaviour
         GameObject effectPrefab = GameManager.Instance.typeEffectPrefabs[typeIndex];
         if (effectPrefab != null)
         {
-            Instantiate(effectPrefab, position, Quaternion.identity);
+            GameObject effect = Instantiate(effectPrefab, target.position, Quaternion.identity);
+            if (GameManager.Instance.allEffects != null)
+                effect.transform.SetParent(GameManager.Instance.allEffects.transform);
         }
     }
 
@@ -233,7 +260,7 @@ public class ChessPieces : MonoBehaviour
             count++;
 
             // 이펙트 생성 (타입 0: Electric)
-            SpawnEffect(0, go.transform.position);
+            SpawnEffect(0, go.transform);
 
             // 주변 적 추가
             var cols = Physics2D.OverlapCircleAll(go.transform.position, attackRange, 1 << enemyLayer);
@@ -253,7 +280,7 @@ public class ChessPieces : MonoBehaviour
         if (enemyNav == null) yield break;
 
         // 즉시 기본 데미지 적용 + 이펙트
-        SpawnEffect(1, enemyNav.transform.position);
+        SpawnEffect(1, enemyNav.transform);
         int immediateDmg = Mathf.RoundToInt(baseDamage);
         enemyNav.Damaged(immediateDmg);
 
@@ -266,7 +293,7 @@ public class ChessPieces : MonoBehaviour
             if (enemyNav == null) yield break; // 적이 사망했으면 중단
             
             // 틱마다 독 이펙트 생성
-            SpawnEffect(1, enemyNav.transform.position);
+            SpawnEffect(1, enemyNav.transform);
             
             int tickDmg = Mathf.Max(1, Mathf.RoundToInt(baseDamage * ratio));
             enemyNav.Damaged(tickDmg);
@@ -295,6 +322,10 @@ public class ChessPieces : MonoBehaviour
         
         var pos = enemyNav.transform.position;
         var inst = Instantiate(explosionEffect, pos, Quaternion.identity);
+        if (GameManager.Instance.allEffects != null)
+        {
+            inst.transform.SetParent(GameManager.Instance.allEffects.transform);
+        }
         
         // Explosion 컴포넌트에 범위와 데미지 전달
         inst.SendMessage("InitExplosion", new Vector2(range, baseDamage * damageRatio), SendMessageOptions.DontRequireReceiver);
@@ -309,7 +340,7 @@ public class ChessPieces : MonoBehaviour
         
         // 바람 이펙트 생성 (타입 3: Wind)
         if (enemyNav != null)
-            SpawnEffect(3, enemyNav.transform.position);
+            SpawnEffect(3, enemyNav.transform);
     }
 
     // 4: 즉사 확률
@@ -319,12 +350,14 @@ public class ChessPieces : MonoBehaviour
         
         if (Random.value < prob)
         {
-            // 즉사 성공 시에만 이펙트 생성 (타입 4: Death)
-            SpawnEffect(4, enemyNav.transform.position);
+            // 즉사 성공 시 이펙트 생성 (타입 4: Death)
+            SpawnEffect(4, enemyNav.transform);
             Destroy(enemyNav.gameObject);
         }
         else
         {
+            // 즉사 실패 시 바람 이펙트 생성 (타입 3: Wind)
+            SpawnEffect(3, enemyNav.transform);
             enemyNav.Damaged(Mathf.RoundToInt(baseDamage * 0.5f));
         }
     }
@@ -335,7 +368,7 @@ public class ChessPieces : MonoBehaviour
         if (enemyNav == null) return;
         
         // 얼음 이펙트 생성 (타입 5: Ice)
-        SpawnEffect(5, enemyNav.transform.position);
+        SpawnEffect(5, enemyNav.transform);
         
         // EnemyNav 내부에서 슬로우/정지 처리를 하도록 요청
         enemyNav.ApplySlow(new Vector2(slowRate, slowTime));
@@ -349,17 +382,13 @@ public class ChessPieces : MonoBehaviour
         enemyNav.Damaged(Mathf.RoundToInt(baseDamage));
     }
 
-    /// <summary>
-    /// 공격 가능 여부 확인 (적에게 공격당한 후 1초간 공격 불가)
-    /// </summary>
+    // 공격 가능 여부 확인 (적에게 공격당한 후 1초간 공격 불가)
     public bool CanAttack()
     {
         return (Time.time - lastHitByEnemyTime) >= attackDisableDuration;
     }
 
-    /// <summary>
-    /// 적에게 공격당했을 때 호출
-    /// </summary>
+    // 적에게 공격당했을 때 호출
     public void OnHitByEnemy()
     {
         lastHitByEnemyTime = Time.time;

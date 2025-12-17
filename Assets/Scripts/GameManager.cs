@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
     public List<Transform> wayPoints; // 웨이 포인트 리스트
-    public GameObject allEnemy; // 모든 적들을 담을 부모 오브젝트
+    [HideInInspector] public GameObject allEnemy; // 모든 적들을 담을 부모 오브젝트 (자동 생성)
+    [HideInInspector] public GameObject allEffects; // 모든 이펙트를 담을 부모 오브젝트 (자동 생성)
     public CPType _CPType;
     public int[] CPTypeLevel = { 1, 1, 1, 1, 1, 1 };
     
@@ -60,6 +61,18 @@ public class GameManager : MonoBehaviour
         else if (Instance != this)
         {
             Destroy(gameObject);
+        }
+        
+        // allEnemy 빈 오브젝트 생성
+        if (allEnemy == null)
+        {
+            allEnemy = new GameObject("AllEnemy");
+        }
+        
+        // allEffects 빈 오브젝트 생성
+        if (allEffects == null)
+        {
+            allEffects = new GameObject("AllEffects");
         }
     }
 

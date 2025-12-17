@@ -8286,13 +8286,14 @@ MonoBehaviour:
   - {fileID: 793359112}
   - {fileID: 1535821993}
   allEnemy: {fileID: 1797599841}
+  allEffects: {fileID: 0}
   _CPType: {fileID: 11400000, guid: c424f1ac23983bd4c93747700914fdbd, type: 2}
   CPTypeLevel: 010000000100000001000000010000000100000001000000
   typeEffectPrefabs:
   - {fileID: 4306488877223958017, guid: ecb38e0319a6ad44cbca52d7b5add7a6, type: 3}
   - {fileID: 2957842864923083962, guid: ace9fc22d4885204fad19db7b31cf379, type: 3}
   - {fileID: 5586783540032275536, guid: 6e57a3cf9435eb14fb9928fa4ee60c63, type: 3}
-  - {fileID: 0}
+  - {fileID: 7428353199889976217, guid: 5b4f9bd7f869abf4a827f1d8e35d7af4, type: 3}
   - {fileID: 5669246471909640947, guid: bfd016bff164dfc4aac33a0563922772, type: 3}
   - {fileID: 3042519775331041172, guid: 841004c4c6a39e244abe2257394de913, type: 3}
   Gold: 100
