@@ -37,6 +37,21 @@ public class EnemyNav : MonoBehaviour
             currentHealth = maxHealth;
         }
     }
+    
+    /// <summary>
+    /// 웨이브 배율 적용 (EnemyState.Health × 웨이브)
+    /// </summary>
+    public void SetWaveMultiplier(int wave)
+    {
+        if (enemyState != null)
+        {
+            maxHealth = Mathf.Max(1, enemyState.Health * wave);
+            currentHealth = maxHealth;
+            UpdateHealthSlider();
+            Debug.Log($"[EnemyNav] {gameObject.name} 체력 설정: {enemyState.Health} × {wave} = {maxHealth}");
+        }
+    }
+    
     void Start()
     {
         for (int i = 0; i < GameManager.Instance.wayPoints.Count; i++)
@@ -295,11 +310,18 @@ public class EnemyNav : MonoBehaviour
         return pieces;
     }
 
-    // 투명도 일시적 감소
+    // 투명도 일시적 감소 (적의 공격)
     private IEnumerator ReduceAlphaTemporarily(GameObject piece, float targetAlpha, float duration)
     {
         var sr = piece.GetComponentInChildren<SpriteRenderer>();
         if (sr == null) yield break;
+
+        // 기물이 공격당했음을 기록 (공격 불가 상태로 만듬)
+        var chessPiece = piece.GetComponent<ChessPieces>();
+        if (chessPiece != null)
+        {
+            chessPiece.OnHitByEnemy();
+        }
 
         Color originalColor = sr.color;
         Color reducedColor = new Color(originalColor.r, originalColor.g, originalColor.b, targetAlpha);

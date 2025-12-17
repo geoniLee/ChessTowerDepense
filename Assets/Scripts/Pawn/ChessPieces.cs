@@ -17,6 +17,12 @@ public class ChessPieces : MonoBehaviour
     public int grade = 0;
 
     private Coroutine windCoroutine;
+    
+    // 적에게 공격당한 후 공격 불가 시간
+    private float lastHitByEnemyTime = -10f; // 마지막으로 적에게 공격당한 시간
+    private const float attackDisableDuration = 1f; // 공격 불가 지속 시간 (1초)
+    
+    // 킹 버프 시스템은 GameManager에서 전역 관리됨
 
     void Awake()
     {
@@ -62,11 +68,11 @@ public class ChessPieces : MonoBehaviour
         switch (type)
         {
             case 0: col = new Color(1, 1, 179f/255f); break; // 전기 - 노랑
-            case 1: col = new Color(179f/255f, 1, 179f/255f); break; // 독 - 연두
+            case 1: col = new Color(198f/255f, 179f/255f, 1); break; // 독 - 연두
             case 2: col = new Color(1, 179f/255f, 179f/255f); break; // 불 - 빨강
             case 3: col = new Color(179f/255f, 1, 1); break; // 바람 - 하늘색
-            case 4: col = new Color(198f/255f, 179f/255f, 1); break; // 암흑 - 보라
-            case 5: col = new Color(179f/255f, 198f/255f, 1); break; // 얼음 - 파랑
+            case 4: col = new Color(90f/255f, 90f/255f, 100f/255f); break; // 암흑 - 보라
+            case 5: col = new Color(105f/255f, 213f/255f, 1); break; // 얼음 - 파랑
             default: col = Color.white; break;
         }
 
@@ -93,6 +99,12 @@ public class ChessPieces : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // 적에게 공격당한 후 공격 불가 시간이면 공격하지 않음
+        if (!CanAttack())
+        {
+            return;
+        }
+
         if (enemy == null)
         {
             enemy = Physics2D.OverlapCircle(transform.position, attackRange, enemyLayerMask);
@@ -110,8 +122,12 @@ public class ChessPieces : MonoBehaviour
                 enemy = null;
                 target = null;
 
+                // 킹 버프 적용: 아군 킹 개수에 따라 공격속도 배율
+                int kingCount = GameManager.Instance != null ? GameManager.Instance.GetAllyKingCount() : 0;
+                float attackSpeedMultiplier = 1.0f + Mathf.Min(kingCount, 3) * 1.0f;
+                
                 // 기본 공격 지연 초기화 (바람 타입 등은 내부에서 조정 가능)
-                attackDelay = pawnState.AttackDelay;
+                attackDelay = pawnState.AttackDelay / attackSpeedMultiplier;
             }
         }
     }
@@ -124,15 +140,19 @@ public class ChessPieces : MonoBehaviour
         CPType cp = GameManager.Instance != null ? GameManager.Instance._CPType : null;
         int baseDamage = pawnState != null ? pawnState.Damage : 1;
         
-        // CPType의 damageRatio 배율 적용 (레벨당 +0.1)
+        // CPType의 damageRatio 배율 적용 (레벨당 +0.5)
         float ratio = 1.0f; // 기본 배율
         if (cp != null && cp.damageRatio != null && type >= 0 && type < cp.damageRatio.Length)
         {
-            // 기본 배율 + (레벨 - 1) * 0.1
-            ratio = cp.damageRatio[type] + (typeLevel - 1) * 0.1f;
+            // 기본 배율 + (레벨 - 1) * 0.5
+            ratio = cp.damageRatio[type] + (typeLevel - 1) * 0.5f;
         }
         
-        float damageWithLevel = baseDamage * ratio;
+        // 킹 버프 적용: 아군 킹 개수에 따라 데미지 배율 (1개: 2배, 2개: 3배, 3개 이상: 4배)
+        int kingCount = GameManager.Instance != null ? GameManager.Instance.GetAllyKingCount() : 0;
+        float kingBuffMultiplier = 1.0f + Mathf.Min(kingCount, 3) * 1.0f;
+        
+        float damageWithLevel = baseDamage * ratio * kingBuffMultiplier;
         
         // 5레벨당 특성 강화 계산
         int levelBonus = (typeLevel - 1) / 5; // 1~4렉: 0, 5~9렉: 1, 10~14렉: 2...
@@ -327,5 +347,21 @@ public class ChessPieces : MonoBehaviour
 
         // 기본 데미지도 적용
         enemyNav.Damaged(Mathf.RoundToInt(baseDamage));
+    }
+
+    /// <summary>
+    /// 공격 가능 여부 확인 (적에게 공격당한 후 1초간 공격 불가)
+    /// </summary>
+    public bool CanAttack()
+    {
+        return (Time.time - lastHitByEnemyTime) >= attackDisableDuration;
+    }
+
+    /// <summary>
+    /// 적에게 공격당했을 때 호출
+    /// </summary>
+    public void OnHitByEnemy()
+    {
+        lastHitByEnemyTime = Time.time;
     }
 }

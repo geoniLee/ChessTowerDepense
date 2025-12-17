@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Rook
   m_EditorClassIdentifier: 
   enemyGrade: 3
-  Health: 70
+  waveCost: 10
+  Health: 6
   Speed: 2
   Damage: 1
   StunTime: 0

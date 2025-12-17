@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Knight
   m_EditorClassIdentifier: 
   enemyGrade: 1
-  Health: 60
+  waveCost: 10
+  Health: 5
   Speed: 3
   Damage: 1
   StunTime: 0

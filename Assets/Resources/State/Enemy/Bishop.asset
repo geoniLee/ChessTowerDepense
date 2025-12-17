@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Bishop
   m_EditorClassIdentifier: 
   enemyGrade: 2
-  Health: 20
+  waveCost: 10
+  Health: 2
   Speed: 1.5
   Damage: 1
   StunTime: 0

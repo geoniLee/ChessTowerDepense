@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: King
   m_EditorClassIdentifier: 
   enemyGrade: 5
-  Health: 800
+  waveCost: 10
+  Health: 160
   Speed: 0.5
   Damage: 1
   StunTime: 0

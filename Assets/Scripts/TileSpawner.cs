@@ -225,6 +225,15 @@ public class TileSpawner : MonoBehaviour
 
         Debug.Log($"[TileSpawner] 등급 {nextGrade} 기물 생성 완료");
         
+        // 최고 등급(킹)이면 킹 카운트 증가
+        if (gradePrefabs != null && nextGrade == gradePrefabs.Length - 1)
+        {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnKingSpawned();
+            }
+        }
+        
         return true;
     }
     #endregion

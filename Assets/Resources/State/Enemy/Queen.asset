@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Queen
   m_EditorClassIdentifier: 
   enemyGrade: 4
-  Health: 400
+  Health: 80
   Speed: 1
   Damage: 1
   StunTime: 0

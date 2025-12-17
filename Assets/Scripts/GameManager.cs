@@ -23,6 +23,13 @@ public class GameManager : MonoBehaviour
     
     [Header("체력 시스템")]
     public int Health = 3; // 체력
+    public TextMeshProUGUI healthText; // 체력 표시
+    
+    [Header("웨이브 UI")]
+    public TextMeshProUGUI waveText; // 웨이브 표시
+    
+    [Header("보스 타이머 UI")]
+    public TextMeshProUGUI bossTimerText; // 보스 타이머 표시 (빨간색)
     
     private bool isGameOver = false; // 게임 오버 상태
     
@@ -36,6 +43,9 @@ public class GameManager : MonoBehaviour
     
     [Header("게임 오버 UI")]
     public GameObject gameOverUI; // 게임 오버 시 표시할 UI
+    
+    // 킹 버프 시스템
+    private int allyKingCount = 0; // 아군 킹 개수
     
     // 단방향: GameManager는 이벤트(감지 신호)만 발행하고 구독자들은 스스로 상태를 확인합니다.
     public event Action OnCPTypeUpgraded;
@@ -67,6 +77,7 @@ public class GameManager : MonoBehaviour
         
         UpdateGoldUI();
         UpdateUpgradeButtonTexts();
+        UpdateHealthUI();
     }
 
     private void Update()
@@ -121,9 +132,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 기물 소환 시 골드 소비 (성공 시 true 반환, 비용 10씩 증가)
-    /// </summary>
+    // 기물 소환 시 골드 소비 (성공 시 true 반환, 비용 10씩 증가)
     public bool TrySpendGoldForSpawn()
     {
         if (Gold >= spawnCost)
@@ -142,9 +151,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 골드 UI 업데이트
-    /// </summary>
+    // 골드 UI 업데이트
     public void UpdateGoldUI()
     {
         if (goldText != null)
@@ -154,9 +161,39 @@ public class GameManager : MonoBehaviour
             spawnCostText.text = $"Cost: {spawnCost}";
     }
 
-    /// <summary>
-    /// 속성 업그레이드 버튼 텍스트 업데이트
-    /// </summary>
+    // 체력 UI 업데이트
+    public void UpdateHealthUI()
+    {
+        if (healthText != null)
+            healthText.text = $"Health: {Health}";
+    }
+
+    // 웨이브 UI 업데이트
+    public void UpdateWaveUI(int wave)
+    {
+        if (waveText != null)
+            waveText.text = $"Wave: {wave}";
+    }
+
+    // 보스 타이머 UI 업데이트 (소수점 1자리)
+    public void UpdateBossTimer(float remainingTime)
+    {
+        if (bossTimerText != null)
+        {
+            bossTimerText.text = $"{remainingTime:F1}";
+        }
+    }
+
+    // 보스 타이머 UI 활성화/비활성화
+    public void SetBossTimerActive(bool active)
+    {
+        if (bossTimerText != null)
+        {
+            bossTimerText.gameObject.SetActive(active);
+        }
+    }
+
+    // 속성 업그레이드 버튼 텍스트 업데이트
     public void UpdateUpgradeButtonTexts()
     {
         if (upgradeButtons == null) return;
@@ -178,12 +215,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 적이 Goal에 도착했을 때 호출 - 체력 감소
-    /// </summary>
+    // 적이 Goal에 도착했을 때 호출 - 체력 감소
     public void OnEnemyReachedGoal()
     {
         Health--;
+        UpdateHealthUI(); // 체력 UI 업데이트
         Debug.Log($"[GameManager] 적이 Goal 도착! 남은 체력: {Health}");
         
         if (Health <= 0)
@@ -192,9 +228,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 게임 오버 처리 - 게임 멈춤
-    /// </summary>
+    // 게임 오버 처리 - 게임 멈춤
     private void GameOver()
     {
         Debug.Log("[GameManager] 게임 오버! 화면을 터치하여 재시작하세요.");
@@ -206,13 +240,24 @@ public class GameManager : MonoBehaviour
             gameOverUI.SetActive(true);
     }
 
-    /// <summary>
-    /// 게임 재시작 - 현재 씬 다시 로드
-    /// </summary>
+    // 게임 재시작 - 현재 씬 다시 로드
     private void RestartGame()
     {
         Debug.Log("[GameManager] 게임 재시작");
         Time.timeScale = 1f; // 게임 속도 복원
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+
+    // 아군 킹 개수 반환
+    public int GetAllyKingCount()
+    {
+        return allyKingCount;
+    }
+
+    // 킹 소환 시 호출 (카운트 증가)
+    public void OnKingSpawned()
+    {
+        allyKingCount++;
+        Debug.Log($"[GameManager] 킹 소환! 현재 킹 개수: {allyKingCount}");
     }
 }

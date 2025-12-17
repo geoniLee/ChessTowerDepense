@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: Pawn
   m_EditorClassIdentifier: 
   enemyGrade: 0
-  Health: 40
+  waveCost: 10
+  Health: 3
   Speed: 2
   Damage: 1
   StunTime: 0
